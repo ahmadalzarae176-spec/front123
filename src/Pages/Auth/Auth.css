@@ -1,0 +1,251 @@
+.login-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*  background: #1a1a1d;*/
+}
+
+.custom-form {
+  position: relative;
+  width: 1200px; /* ×4 */
+  padding: 100px 60px;
+  text-align: left; /* النصوص على اليسار */
+  z-index: 1;
+  overflow: hidden;
+  color: #fff;
+  font-family: sans-serif;
+  background: #2d2d39;
+  border-radius: 20px;
+}
+
+.form-title {
+  font-size: 2.5rem; /* حجم h1 */
+  margin-bottom: 40px;
+  color: #fff;
+}
+
+/* مجموعة الإدخال مع label متحرك */
+.input-group {
+  position: relative;
+  margin-bottom: 30px;
+  width: 60%;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 10px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  outline: none;
+  background: #fff;
+  color: #000;
+}
+
+.input-group label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  transition: 0.3s ease all;
+  background: #fff;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* لما يكون في تركيز أو المستخدم كتب شي */
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: 0%; /* يوقف عند الحافة العلوية */
+  transform: translateY(-50%); /* يخلي النص بنص سماكة البوردر العلوي */
+  font-size: 0.9rem;
+  color: #4cafef;
+}
+
+.custom-form .login-submit {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #4cafef;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+.login-submit {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #4cafef;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* تأثير Glow خارجي */
+.custom-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 13px;
+  background: linear-gradient(
+    270deg,
+    #ff0057,
+    #00ff88,
+    #ff0057,
+    #5011da,
+    #af0cdc
+  );
+  background-size: 600% 600%;
+  animation: borderFlow 8s linear infinite,
+    glowing 6s ease-in-out infinite alternate;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+.gradient-border-input {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: transparent;
+  color: #000;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* Floating Label */
+.floating-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  transition: 0.2s ease all;
+  background: #fff;
+  padding: 0 4px;
+  border-radius: 4px;
+  z-index: 5;
+}
+/* عندما يكون الحقل مفعل أو يحتوي قيمة */
+.gradient-border-input:focus + .floating-label,
+.gradient-border-input:not(:placeholder-shown) + .floating-label {
+  top: -8px; /* تعديل من 0% إلى -8px ليكون فوق منتصف الشريط الملون */
+  transform: translateY(0); /* يثبت في مكانه */
+  font-size: 0.9rem;
+  color: #4cafef;
+}
+
+/* زر العين */
+.password-group {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 10;
+}
+
+/* لما يصير فوكس */
+.gradient-border-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 3.5px solid transparent; /* شفاف */
+  background: linear-gradient(white, white) padding-box,
+    /* يخلي الداخل أبيض */
+      linear-gradient(270deg, #ff0057, #00ff88, #ff0057, #5011da, #af0cdc);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size: 400% 400%;
+  animation: moveGradient 6s linear infinite;
+}
+
+@keyframes moveGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes borderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glowing {
+  0% {
+    filter: drop-shadow(0 0 15px #ff0057) drop-shadow(0 0 25px #00ff88);
+  }
+  100% {
+    filter: drop-shadow(0 0 20px #00ff88) drop-shadow(0 0 30px #ff0057);
+  }
+}
+
+@media (max-width: 992px) {
+  form {
+    background-image: linear-gradient(
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0.8) 100%
+    );
+  }
+  .custom-form {
+    width: 100%;
+  }
+  .form-custom input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .password-toggle {
+    position: absolute;
+    right: 10px;         /* خليه يمين */
+    top: 50%;            /* خليه بالنص */
+    transform: translateY(-50%); /* النص العمودي */
+    font-size: 1.1rem;
+    background: transparent; 
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 10;         /* يضل فوق */
+  }
+
+
+  .input-group.password-group {
+    position: relative; /* حتى يبقى الزر absolute بالنسبة لها */
+    width: 100%;
+  }
+}
