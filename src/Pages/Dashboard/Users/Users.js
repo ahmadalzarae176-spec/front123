@@ -11,7 +11,7 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(3);
+  const [limit, setLimit] = useState(100);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +36,7 @@ export default function Users() {
   const header = [
     {
       key: "name",
-      name: "Username",
+      name: "Name",
     },
     {
       key: "phone",

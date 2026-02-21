@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Form, FormControl } from "react-bootstrap";
 import { Axios } from "../../../Api/axios";
-import { CAT, Pro } from "../../../Api/Api";
+import { MAT, Pro } from "../../../Api/Api";
 import LoadingSubmit from "../../../Components/Loading/Loading";
 import { useNavigate } from "react-router-dom";
 
@@ -47,7 +47,7 @@ export default function AddLesson() {
 
   //  Get All Categories
   useEffect(() => {
-    Axios.get(`/${CAT}`)
+    Axios.get(`/${MAT}`)
       .then((data) => setCategories(data.data))
       .catch((err) => console.log(err));
   }, []);

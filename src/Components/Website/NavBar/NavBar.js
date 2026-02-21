@@ -97,7 +97,7 @@ export default function Navbar() {
                   {link.name}
                 </li>
               ))}
-              <li style={linkStyle("Profile")} onClick={handleProfileClick}>👤 Profile</li>
+              <li  style={linkStyle("Profile")} onClick={handleProfileClick}>👤 Profile</li>
             </ul>
           )}
 

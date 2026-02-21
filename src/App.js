@@ -17,6 +17,9 @@ import Categories from "./Pages/Dashboard/Materials/Categories";
 import Products from "./Pages/Dashboard/Lesson/Products";
 import UpdateLesson from "./Pages/Dashboard/Lesson/Lesson";
 import AddLesson from "./Pages/Dashboard/Lesson/AddLesson";
+import T_Intensive from "./Pages/Dashboard/IntensiveCourse/T-Intensive";
+import Intensive from "./Pages/Dashboard/IntensiveCourse/IntensiveCo";
+import AddIntensive from "./Pages/Dashboard/IntensiveCourse/AddIntensiveCo";
 
 function App() {
   return (
@@ -44,6 +47,10 @@ function App() {
             <Route path="products" element={<Products />} />
             <Route path="products/:id" element={<UpdateLesson />} />
             <Route path="product/add" element={<AddLesson />} />
+            {/*Intensive course */}
+            <Route path="T_Intensive" element={<T_Intensive />} />
+            <Route path="Intensive/:id" element={<Intensive />} />
+            <Route path="Intensive/add" element={<AddIntensive />} />
           </Route>
         </Routes>
       </WindowContext>

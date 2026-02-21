@@ -74,9 +74,9 @@ export default function Student() {
             <option disabled value="">
               Select VegSystem
             </option>
-            <option value="1995">Admin</option>
+            {/* <option value="1995">Admin</option>
             <option value="2001">User</option>
-            <option value="1996">Writer</option>
+            <option value="1996">Writer</option> */}
           </Form.Select>
         </Form.Group>
         <button disabled={disable} className="btn btn-primary">

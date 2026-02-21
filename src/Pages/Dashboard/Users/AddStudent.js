@@ -1,179 +1,171 @@
 import { useEffect, useRef, useState } from "react";
+import Select from "react-select";
 import { Form } from "react-bootstrap";
 import { Axios } from "../../../Api/axios";
-import { STD } from "../../../Api/Api";
-import { Class } from "../../../Api/Api";
+import { STD, Class, SubClas } from "../../../Api/Api";
 import LoadingSubmit from "../../../Components/Loading/Loading";
 
 export default function AddStudent() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [vegSystem, setVegSystem] = useState("");
+  const [vegSystem, setVegSystem] = useState(""); // "class" أو "subject"
   const [vegTouched, setVegTouched] = useState(false);
-  const [role, setRole] = useState(""); // هون صار مستلم ID من الباك
-  const [Loading, setLoading] = useState(false);
+  const [role, setRole] = useState(""); // ID من الباك إذا كان موجود
 
-  // ▼ الصفوف القادمة من الباك
   const [grades, setGrades] = useState([]);
   const [selectedGradeId, setSelectedGradeId] = useState("");
-  const [class_loading, setClassLoading] = useState(true);
-  const [error, setError] = useState(null);
-  // ▼ المواد القادمة من الباك
+  const [classLoading, setClassLoading] = useState(true);
+  const [classError, setClassError] = useState(null);
+
   const [subjects, setSubjects] = useState([]);
-
-  // ▼ المواد المختارة
   const [selectedSubjects, setSelectedSubjects] = useState([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
 
-  // Ref
-  const focus = useRef("");
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  //  Handel Focus
+  const nameInputRef = useRef(null);
+
+  // Focus on name input when component mounts
   useEffect(() => {
-    focus.current.focus();
+    nameInputRef.current?.focus();
   }, []);
 
-  // 🔹 جلب الصفوف من الباك عند فتح الصفحة
+  // جلب الصفوف مرة واحدة
   useEffect(() => {
     const fetchGrades = async () => {
       try {
         setClassLoading(true);
         const response = await Axios.get(Class);
-        const data = response.data;
-        // حسب شكل البيانات اللي راجعة من الـ API
-        // افتراضي شائع: array of objects → [{id: 1, name: "الصف الأول"}, ...]
-        setGrades(data.classes);
-        // أو إذا البيانات داخل key مثلاً data.data أو data.classes:
-        // setGrades(data.data  data.classes  data || []);
+        // افتراض: response.data = { classes: [...] } أو array مباشرة
+        setGrades(response.data.classes || response.data || []);
       } catch (err) {
-        console.error("فشل جلب الصفوف:", err);
-        if (err.response) {
-          console.log(
-            "الرد من السيرفر:",
-            err.response.status,
-            err.response.data
-          );
-        }
-        setError("تعذر تحميل قائمة الصفوف");
+        console.error("فشل جلب الصفوف", err);
+        setClassError("تعذر تحميل قائمة الصفوف");
       } finally {
         setClassLoading(false);
       }
     };
+
     fetchGrades();
-  }, []); // [] = نفذ مرة واحدة فقط
+  }, []);
 
-  // 🔹 عندما يختار المستخدم نظام مواد → جيب المواد من الباك
+  // جلب المواد عند تغيير الصف أو نوع النظام
   useEffect(() => {
-    if (vegSystem === "subject") {
-      Axios.get(`${STD}/subjects`)
-        .then((res) => {
-          setSubjects(res.data);
-        })
-        .catch((err) => console.log(err));
+    if (!selectedGradeId || vegSystem !== "subject") {
+      setSubjects([]);
+      setSelectedSubjects([]);
+      setLoadingSubjects(false);
+      return;
     }
-  }, [vegSystem]);
 
-  //  Handle Submit
-  async function HandleSubmit(e) {
-    setLoading(true);
+    const fetchSubjectsForGrade = async () => {
+      setLoadingSubjects(true);
+      try {
+        const response = await Axios.get(`${SubClas}/${selectedGradeId}`);
+        setSubjects(response.data.subjects || []);
+      } catch (err) {
+        console.error("خطأ جلب المواد:", err);
+        setSubjects([]);
+      } finally {
+        setLoadingSubjects(false);
+      }
+    };
+
+    fetchSubjectsForGrade();
+  }, [selectedGradeId, vegSystem]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitLoading(true);
 
     try {
-      const res = await Axios.post(`${STD}/add`, {
+      const payload = {
         name,
         phone,
-        role, // هنا صار ID من الباك
+        role,
         vegSystem,
-        subjects: vegSystem === "subject" ? selectedSubjects : [],
-      });
+        subjects: vegSystem === "subject" || "class" ? selectedSubjects : [],
+      };
 
-      window.location.pathname = "/dashboard/users";
+      const res1 = await Axios.post(`${STD}`, payload);
+      window.alert(res1.data.code);
+      // console.log(res1.data.code);
+      //  window.location.pathname = "/dashboard/users";
     } catch (err) {
-      setLoading(false);
-      console.log(err);
+      console.error("خطأ إضافة الطالب:", err);
+      // يمكنك هنا عرض رسالة خطأ للمستخدم
+    } finally {
+      setSubmitLoading(false);
     }
-  }
+  };
+
+  const isFormValid =
+    name.trim().length > 1 &&
+    phone.trim().length > 5 &&
+    vegSystem &&
+    //role !== "" &&
+    (vegSystem !== "subject" || selectedSubjects.length > 0);
 
   return (
     <>
-      {Loading && <LoadingSubmit />}
-
+      {" "}
+      {submitLoading && <LoadingSubmit />}
       <Form
         className="white w-100 px-4 py-3 rounded shadow-sm"
-        onSubmit={HandleSubmit}
+        onSubmit={handleSubmit}
       >
-        {/* =============================== */}
-        {/* الصفوف القادمة من الباك */}
-        {/* =============================== */}
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-          <Form.Label>الصف</Form.Label>
-
+        {" "}
+        {/* ---------------- الصف ---------------- */}{" "}
+        <Form.Group className="mb-3" controlId="gradeSelect">
+          <Form.Label> الصف </Form.Label>{" "}
           <Form.Select
             value={selectedGradeId}
-            onChange={(e) => {
-              const gradeId = e.target.value;
-              setSelectedGradeId(gradeId);
-
-              // هنا بتقدر ترسل الـ id لأي مكان بدك ياه
-              console.log("تم اختيار الصف رقم:", gradeId);
-
-              // مثال: إذا بدك ترسله لـ API أو لـ state أعلى
-              // sendGradeIdToParent(gradeId);
-            }}
+            onChange={(e) => setSelectedGradeId(e.target.value)}
+            disabled={classLoading || !!classError}
             required
-            disabled={class_loading || !!error}
           >
-            <option disabled value="">
-              {class_loading
+            <option value="" disabled>
+              {" "}
+              {classLoading
                 ? "جاري التحميل..."
-                : error
-                ? "حدث خطأ"
-                : "اختر الصف"}
+                : classError
+                  ? "حدث خطأ"
+                  : "اختر الصف"}{" "}
             </option>
-
             {grades.map((grade) => (
               <option key={grade.id} value={grade.id}>
-                {grade.name}
-                {/* أو grade.class_name أو grade.title ... حسب اسم الحقل في الـ API */}
+                {" "}
+                {grade.name}{" "}
               </option>
-            ))}
-          </Form.Select>
+            ))}{" "}
+          </Form.Select>{" "}
         </Form.Group>
-
-        {/* =============================== */}
-        {/* الاسم */}
-        {/* =============================== */}
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-          <Form.Label> اسم الطالب</Form.Label>
+        {/* ---------------- الاسم ---------------- */}{" "}
+        <Form.Group className="mb-3" controlId="studentName">
+          <Form.Label> اسم الطالب </Form.Label>{" "}
           <Form.Control
-            ref={focus}
+            ref={nameInputRef}
             value={name}
-            required
             onChange={(e) => setName(e.target.value)}
             type="text"
             placeholder="الاسم..."
+            required
           />
         </Form.Group>
-
-        {/* =============================== */}
-        {/* رقم الهاتف */}
-        {/* =============================== */}
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
-          <Form.Label>رقم الهاتف</Form.Label>
+        {/* ---------------- رقم الهاتف ---------------- */}{" "}
+        <Form.Group className="mb-3" controlId="phone">
+          <Form.Label> رقم الهاتف </Form.Label>{" "}
           <Form.Control
             value={phone}
-            required
             onChange={(e) => setPhone(e.target.value)}
-            type="number"
+            type="tel"
             placeholder="رقم الهاتف..."
+            required
           />
         </Form.Group>
-
-        {/* =============================== */}
-        {/* نوع التسجيل */}
-        {/* =============================== */}
-        <Form.Group className="mb-3" required>
-          <Form.Label>نوع التسجيل</Form.Label>
-
+        {/* ---------------- نوع التسجيل ---------------- */}{" "}
+        <Form.Group className="mb-3">
+          <Form.Label> نوع التسجيل </Form.Label>{" "}
           <div onBlur={() => setVegTouched(true)}>
             <Form.Check
               inline
@@ -183,8 +175,7 @@ export default function AddStudent() {
               value="class"
               checked={vegSystem === "class"}
               onChange={(e) => setVegSystem(e.target.value)}
-            />
-
+            />{" "}
             <Form.Check
               inline
               label="نظام مواد"
@@ -193,63 +184,106 @@ export default function AddStudent() {
               value="subject"
               checked={vegSystem === "subject"}
               onChange={(e) => setVegSystem(e.target.value)}
-            />
+            />{" "}
           </div>
-
           {vegTouched && !vegSystem && (
-            <small style={{ color: "red" }}>الرجاء اختيار نوع التسجيل</small>
-          )}
+            <small
+              style={{
+                color: "red",
+              }}
+            >
+              {" "}
+              الرجاء اختيار نوع التسجيل{" "}
+            </small>
+          )}{" "}
         </Form.Group>
+        {/* ---------------- عرض المواد فقط عند اختيار نظام مواد ---------------- */}{" "}
+        {vegSystem === "subject" && selectedGradeId && (
+          <div className="mt-4">
+            {/* منطقة المواد المختارة (الـ inbox) */}
+            <div className="mb-4">
+              <label className="form-label fw-bold d-block mb-2">
+                المواد المختارة
+              </label>
+              <div
+                className="d-flex flex-wrap gap-2 p-3 border rounded bg-light"
+                style={{ minHeight: "80px" }}
+              >
+                {selectedSubjects.length === 0 ? (
+                  <span className="text-muted align-self-center">
+                    لم يتم اختيار مواد بعد
+                  </span>
+                ) : (
+                  selectedSubjects.map((subId) => {
+                    const sub = subjects.find((s) => s.id === subId);
+                    return sub ? (
+                      <span
+                        key={sub.id}
+                        className="badge bg-primary text-white px-3 py-2 d-flex align-items-center gap-2"
+                        style={{
+                          fontSize: "0.95rem",
+                          borderRadius: "9999px", // دائرة كاملة أو شبه دائرة
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          // إزالة المادة من المختارة عند الضغط عليها
+                          setSelectedSubjects((prev) =>
+                            prev.filter((id) => id !== sub.id),
+                          );
+                        }}
+                      >
+                        {sub.name}
+                        <span className="fw-bold ms-1">×</span>
+                      </span>
+                    ) : null;
+                  })
+                )}
+              </div>
+            </div>
 
-        {/* =============================== */}
-        {/* عرض المواد عند اختيار نظام مواد */}
-        {/* =============================== */}
-        {vegSystem === "subject" && (
-          <div
-            className="mt-2 p-2"
-            style={{ border: "1px solid #ddd", borderRadius: 6 }}
-          >
-            <strong>اختر المواد:</strong>
-
-            {subjects.length === 0 ? (
-              <p>جاري تحميل المواد...</p>
-            ) : (
-              subjects.map((sub) => (
-                <Form.Check
-                  key={sub.id}
-                  label={sub.name}
-                  value={sub.id}
-                  type="checkbox"
-                  onChange={(e) => {
-                    const id = sub.id;
-
-                    if (e.target.checked) {
-                      setSelectedSubjects((prev) => [...prev, id]);
-                    } else {
-                      setSelectedSubjects((prev) =>
-                        prev.filter((s) => s !== id)
-                      );
-                    }
-                  }}
-                />
-              ))
-            )}
+            {/* المواد المتاحة (كلها ظاهرة مباشرة) */}
+            <div>
+              <label className="form-label fw-bold d-block mb-2">
+                اختر المواد المتاحة
+              </label>
+              <div className="d-flex flex-wrap gap-3">
+                {subjects.length === 0 ? (
+                  <div className="text-muted">لا توجد مواد متاحة لهذا الصف</div>
+                ) : (
+                  subjects
+                    .filter((sub) => !selectedSubjects.includes(sub.id))
+                    .map((sub) => (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        className="btn btn-outline-primary px-4 py-2"
+                        style={{
+                          borderRadius: "9999px", // شكل دائري/شبه دائري
+                          whiteSpace: "nowrap",
+                          fontSize: "0.95rem",
+                        }}
+                        onClick={() => {
+                          setSelectedSubjects((prev) => [...prev, sub.id]);
+                        }}
+                      >
+                        {sub.name}
+                      </button>
+                    ))
+                )}
+              </div>
+            </div>
           </div>
         )}
-
-        {/* =============================== */}
-        {/* زر الإرسال */}
-        {/* =============================== */}
+        {/* زر الإرسال */}{" "}
         <button
-          onClick={() => setVegTouched(true)}
-          disabled={
-            name.length <= 1 || phone.length <= 1 || !vegSystem || role === ""
-          }
-          className="btn btn-primary mt-3"
+          type="submit"
+          disabled={!isFormValid || submitLoading}
+          className="btn btn-primary mt-4 px-5"
         >
-          Submit
-        </button>
-      </Form>
+          {" "}
+          {submitLoading ? "جاري الإضافة..." : "إضافة الطالب"}{" "}
+        </button>{" "}
+      </Form>{" "}
     </>
   );
 }

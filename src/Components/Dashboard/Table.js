@@ -10,6 +10,7 @@ import TransformDate from "../../helpers/TransformDate";
 import { Axios } from "../../Api/axios";
 
 export default function TableShow(props) {
+  const safeData = Array.isArray(props.data) ? props.data : [];
   const currentUser = props.currentUser || {
     name: "",
   };
@@ -20,8 +21,8 @@ export default function TableShow(props) {
 
   const filtredDataByDate =
     date.length !== 0
-      ? props.data.filter((item) => TransformDate(item.created_at) === date)
-      : props.data;
+      ? safeData.filter((item) => TransformDate(item.created_at) === date)
+      : safeData;
 
   const filterSearchByDate =
     date.length !== 0
@@ -31,18 +32,27 @@ export default function TableShow(props) {
   const showWhichData =
     search.length > 0 ? filterSearchByDate : filtredDataByDate;
 
-  async function getSearchedData() {
-    try {
-      const res = await Axios.post(
-        `${props.searchLink}/search?title=${search}`
-      );
-      setFilteredData(res.data);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setSearchLoading(false);
-    }
+async function getSearchedData() {
+  try {
+    const res = await Axios.post(
+      `${props.searchLink}/search?title=${search}`
+    );
+
+    // نحمي النتيجة مهما كان شكلها
+    const result = Array.isArray(res.data)
+      ? res.data
+      : Array.isArray(res.data.data)
+      ? res.data.data
+      : [];
+
+    setFilteredData(result);
+  } catch (err) {
+    console.log(err);
+    setFilteredData([]);
+  } finally {
+    setSearchLoading(false);
   }
+}
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -63,7 +73,7 @@ export default function TableShow(props) {
     </th>
   ));
   // Body Show
-  const dataShow = showWhichData.map((item, key) => (
+    const dataShow = (showWhichData || []).map((item, key) => (
     <tr key={key}>
       {/* أو key={item.id} أفضل بكثير إذا كان item.id موجود وفريد */}
       <td>{item.id}</td>

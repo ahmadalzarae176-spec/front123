@@ -8,7 +8,7 @@ const token = cookie.get("rasheed");
 export const Axios = axios.create({
   baseURL: baseURL,
   headers: {
-    "Content-Type": "application/json",
+    //"Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   },
 });

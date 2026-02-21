@@ -6,10 +6,10 @@ export const ALLSTD = "admin/all_students";
 export const STD = "admin/add_student";
 // export const DelSTD = "admin/delete_student";
 // export const UpdSTD = "admin/update_student";
-export const Class = "/admin/get_all_class";
-
-export const CAT = "categories";
-export const Mat = "category";
+export const Class = "/admin/get_all_classes";
+export const SubClas = "/admin/subjects";
+export const MAT = (class_id) => `/admin/subjects/${class_id}`;
+export const Mat = "/admin/add_new_subject";
 
 export const PRO = "products";
 export const Pro = "product";

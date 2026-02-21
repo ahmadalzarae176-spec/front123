@@ -3,6 +3,8 @@ import {
   faUsers,
   faPersonChalkboard,
   faFilePowerpoint,
+  faGears,
+
 } from "@fortawesome/free-solid-svg-icons";
 
 export const links = [
@@ -39,6 +41,18 @@ export const links = [
   {
     name: "إضافة درس",
     path: "/dashboard/product/add",
+    icon: faPlus,
+  //  role: ["1995", "1999"],.
+  },
+  {
+    name: "الدورات المكثفة",
+    path: "/dashboard/T_Intensive",
+    icon: faGears,
+  //  role: ["1995", "1999"],
+  },
+  {
+    name: "إضافة دورة مكثفة",
+    path: "/dashboard/Intensive/add",
     icon: faPlus,
   //  role: ["1995", "1999"],
   },

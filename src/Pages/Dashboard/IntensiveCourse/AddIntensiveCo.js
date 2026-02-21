@@ -5,11 +5,9 @@ import { Mat } from "../../../Api/Api";
 import { Class } from "../../../Api/Api";
 import LoadingSubmit from "../../../Components/Loading/Loading";
 
-export default function AddMaterial() {
-  const [teacher_name, setTeacher_name] = useState("");
-  const [teacher_phone, setTeacher_phone] = useState("");
-  const [teacher_photo, setTeacher_photo] = useState("");
-  const [name, setName] = useState("");
+export default function AddIntensive() {
+  const [title, setTitle] = useState("");
+  const [material, setMaterial] = useState("");
   const [image, setImage] = useState("");
   const [Loading, setLoading] = useState(false);
   const [class_loading, setClassLoading] = useState(true);
@@ -25,59 +23,49 @@ export default function AddMaterial() {
     focus.current.focus();
   }, []);
 
-  // 🔹 جلب الصفوف من الباك عند فتح الصفحة
-  useEffect(() => {
-    const fetchGrades = async () => {
-      try {
-        setClassLoading(true);
-        const response = await Axios.get(Class);
-        const data = response.data;
-        // حسب شكل البيانات اللي راجعة من الـ API
-        // افتراضي شائع: array of objects → [{id: 1, name: "الصف الأول"}, ...]
-        setGrades(data.classes);
-        // أو إذا البيانات داخل key مثلاً data.data أو data.classes:
-        // setGrades(data.data  data.classes  data || []);
-      } catch (err) {
-        console.error("فشل جلب الصفوف:", err);
-        if (err.response) {
-          console.log(
-            "الرد من السيرفر:",
-            err.response.status,
-            err.response.data,
-          );
+   // 🔹 جلب الصفوف من الباك عند فتح الصفحة
+    useEffect(() => {
+      const fetchGrades = async () => {
+        try {
+          setClassLoading(true);
+          const response = await Axios.get(Class);
+          const data = response.data;
+          // حسب شكل البيانات اللي راجعة من الـ API
+          // افتراضي شائع: array of objects → [{id: 1, name: "الصف الأول"}, ...]
+          setGrades(data.classes);
+          // أو إذا البيانات داخل key مثلاً data.data أو data.classes:
+          // setGrades(data.data  data.classes  data || []);
+        } catch (err) {
+          console.error("فشل جلب الصفوف:", err);
+          if (err.response) {
+            console.log(
+              "الرد من السيرفر:",
+              err.response.status,
+              err.response.data
+            );
+          }
+          setError("تعذر تحميل قائمة الصفوف");
+        } finally {
+          setClassLoading(false);
         }
-        setError("تعذر تحميل قائمة الصفوف");
-      } finally {
-        setClassLoading(false);
-      }
-    };
-    fetchGrades();
-  }, []); // [] = نفذ مرة واحدة فقط
+      };
+      fetchGrades();
+    }, []); // [] = نفذ مرة واحدة فقط
+  
 
   //  Handle Submit
   async function HandleSubmit(e) {
     setLoading(true);
     e.preventDefault();
     const form = new FormData();
-    form.append("name", name);
-    form.append("teacher_name", teacher_name);
-    form.append("teacher_phone", teacher_phone);
-     form.append("image", teacher_photo);
-    form.append("class_id", selectedGradeId);
+    form.append("title", title);
+    form.append("image", image);
     try {
-      const res = await Axios.post(
-        Mat,
-        form , {
-        headers: {
-          "Content-Type" : "application/json",
-        },
-      },
-      );
-      console.log(res.data);
+      const res = await Axios.post(`${Mat}/add`, form);
       window.location.pathname = "/dashboard/categories";
     } catch (err) {
       setLoading(false);
-      console.log("ERROR:", err.response?.data || err);
+      console.log(err);
     }
   }
   return (
@@ -87,7 +75,7 @@ export default function AddMaterial() {
         className="white w-100 px-4 py-3 rounded shadow-sm"
         onSubmit={HandleSubmit}
       >
-        {/* ================================ */}
+        {/* =============================== */}
         {/* الصفوف القادمة من الباك */}
         {/* =============================== */}
         <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
@@ -112,8 +100,8 @@ export default function AddMaterial() {
               {class_loading
                 ? "جاري التحميل..."
                 : error
-                  ? "حدث خطأ"
-                  : "اختر الصف"}
+                ? "حدث خطأ"
+                : "اختر الصف"}
             </option>
 
             {grades.map((grade) => (
@@ -129,45 +117,34 @@ export default function AddMaterial() {
           <Form.Label>المادة</Form.Label>
           <Form.Control
             ref={focus}
-            value={name}
+            value={material}
             required
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setMaterial(e.target.value)}
             type="text"
             placeholder="المادة..."
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-          <Form.Label>اسم المدرس</Form.Label>
+          <Form.Label>Title</Form.Label>
           <Form.Control
             ref={focus}
-            value={teacher_name}
+            value={title}
             required
-            onChange={(e) => setTeacher_name(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             type="text"
-            placeholder="اسم المدرس..."
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-          <Form.Label>رقم المدرس</Form.Label>
-          <Form.Control
-            ref={focus}
-            value={teacher_phone}
-            required
-            onChange={(e) => setTeacher_phone(e.target.value)}
-            type="text"
-            placeholder="رقم المدرس..."
+            placeholder="Title..."
           />
         </Form.Group>
         <FormGroup className="mb-3" controlId="image">
           <Form.Label>Image</Form.Label>
           <FormControl
-            onChange={(e) => setTeacher_photo(e.target.files.item(0))}
+            onChange={(e) => setImage(e.target.files.item(0))}
             type="file"
           ></FormControl>
         </FormGroup>
 
         <button
-          disabled={teacher_name.length > 1 ? false : true}
+          disabled={title.length > 1 ? false : true}
           className="btn btn-primary"
         >
           Save
